@@ -4,12 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // Store error messages
+  const [error, setError] = useState(null);
   const navigate = useNavigate(); // Redirect after login
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Reset error
+    setError(null);
 
     try {
       const response = await fetch("http://localhost:5000/login", {
@@ -19,63 +19,33 @@ const LoginPage = () => {
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Login failed");
 
-      if (!response.ok) {
-        throw new Error(data.error || "Login failed");
-      }
-
-      // Store token & redirect to dashboard/homepage
+      // Store token & redirect to dashboard
       localStorage.setItem("token", data.token);
-      navigate("/dashboard"); // Change to your desired route
-
+      navigate("/dashboard"); // Redirect user after login
     } catch (err) {
       setError(err.message);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-md p-6 shadow-md bg-white rounded-lg">
-        <h2 className="text-3xl font-bold text-center">Login</h2>
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border px-3 py-2 rounded-md"
-              required
-            />
+    <div className="container d-flex justify-content-center align-items-center vh-100">
+      <div className="card p-4 shadow-lg" style={{ width: "350px" }}>
+        <h2 className="text-center">Login</h2>
+        {error && <p className="text-danger text-center">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label">Email</label>
+            <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border px-3 py-2 rounded-md"
-              required
-            />
+          <div className="mb-3">
+            <label className="form-label">Password</label>
+            <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-md"
-          >
-            Login
-          </button>
-          <div className="text-sm text-center mt-4">
-            Don't have an account?{" "}
-            <Link to="/sign-up" className="text-blue-600">
-              Sign up
-            </Link>
+          <button type="submit" className="btn btn-primary w-100">Login</button>
+          <div className="text-center mt-3">
+            Don't have an account? <Link to="/sign-up">Sign Up</Link>
           </div>
         </form>
       </div>
